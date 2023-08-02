@@ -58,26 +58,27 @@ async def get_price_from_google(ean):
                 })
 
         return articles
-
-async def main():
-    # Read the CSV file
-    csv_filename = "test.csv"  # Replace with the actual filename
-    with open(csv_filename, newline='', encoding='utf-8') as csvfile:
-        csv_reader = csv.DictReader(csvfile)
+    
+async def get_articles(csv_reader):
+        cheapest_articles = []
         for row in csv_reader:
             ean = row['EAN']
             articles = await get_price_from_google(ean)
-            cheapest_articles = get_cheapest_articles(articles)
-            print(f"EAN: {ean}")
-            for cheapest_article in cheapest_articles:
-                print(f"Price: {cheapest_article['price']}, Link: {cheapest_article['link']}")
-            # for article in articles:
-    # articles = await get_price_from_google("4008789701466")
-    # for article in articles:
-    #     print(f"Price: {article['price']}, Link: {article['link']}")
-    # cheapest_article = get_cheapest_article(articles)
-    # print(f"Price: {cheapest_article['price']}, Link: {cheapest_article['link']}")
-    
-    # print(articles)
+            cheapest_articles.append({
+                'ean': ean,
+                'articles' : get_cheapest_articles(articles)
+            })
+        return cheapest_articles
+
+async def main():
+    # Read the CSV file
+    csv_filename = "test.csv"
+    with open(csv_filename, newline='', encoding='utf-8') as csvfile:
+        csv_reader = csv.DictReader(csvfile)
+        articles = await get_articles(csv_reader)
+        for article in articles:
+            print(f"EAN: {article['ean']}")
+            for a in article['articles']:
+                print(f"Price: {a['price']}, Link: {a['link']}")
 
 asyncio.run(main())
